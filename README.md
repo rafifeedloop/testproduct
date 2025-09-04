@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TestLab - Mobile Test Orchestration Dashboard
 
-## Getting Started
+A modern, real-time dashboard for mobile test automation with AI-powered test execution insights. Built with Next.js 15, TypeScript, and shadcn/ui.
 
-First, run the development server:
+## 🚀 Features
+
+### 📊 Executive Dashboard
+- **Real-time KPIs**: Test runs, pass rate, execution speed, and flaky rate
+- **Visual Trends**: 7-day trend visualization with pass/fail/flaky breakdown
+- **Device Management**: Monitor device status and availability
+- **Test History**: Comprehensive test run history with filtering
+
+### 🤖 LLM Command Viewer
+- **AI Test Automation Explainability**: Visualize AI decisions during test execution
+- **Step-by-step Timeline**: Track each action taken by the AI agent
+- **Screenshot Comparison**: Before/after screenshots with interactive slider
+- **JSON Command Output**: Syntax-highlighted command details
+- **AI Reasoning**: Understand why the AI made each decision
+
+### 📱 Device Registry
+- **Device Fleet Management**: Track iOS and Android devices
+- **Real-time Status**: Monitor device availability and usage
+- **Device Details**: Hardware specs, OS versions, battery levels
+- **Usage History**: Track test execution history per device
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui
+- **Icons**: Lucide React
+
+## 📦 Installation
 
 ```bash
+# Clone the repository
+git clone <your-repo-url>
+cd blank-project
+
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🗂️ Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                      # Next.js app router
+│   ├── (dashboard)/         # Dashboard route group
+│   │   ├── test-dashboard/  # Main dashboard
+│   │   ├── test-runs/       # Test runs management
+│   │   └── devices/         # Device registry
+├── components/              
+│   ├── dashboard/           # Dashboard components
+│   ├── devices/             # Device management components
+│   ├── llm-viewer/          # LLM command viewer components
+│   └── ui/                  # shadcn/ui components
+└── lib/                     
+    ├── mock-data.ts         # Mock data for development
+    └── llm-command-data.ts  # LLM command types
+```
 
-## Learn More
+## 🎯 Key Features
 
-To learn more about Next.js, take a look at the following resources:
+### Dashboard
+- Pass rate with sparkline visualization
+- Real-time device status monitoring
+- Test execution history with filtering
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### LLM Command Viewer
+Navigate to: Test Runs → Select a run → Timeline tab
+- 3-column layout with step timeline, screenshots, and command details
+- AI reasoning for each test step
+- Interactive before/after screenshot comparison
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Device Registry
+- Search and filter devices by platform, status, and type
+- Device allocation and release management
+- Detailed device information with usage history
 
-## Deploy on Vercel
+## 🔧 Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Development server
+npm run dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## 📄 License
+
+MIT License
+
+---
+
+Built with Next.js and TypeScript
