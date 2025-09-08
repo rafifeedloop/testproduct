@@ -101,7 +101,7 @@ const mockTriggers: Trigger[] = [
     condition: "Manual execution only",
     testSuite: "QA Validation",
     devices: ["QA Test Devices"],
-    lastFiredAt: null,
+    lastFiredAt: undefined,
     lastFiredStatus: null,
     createdBy: "admin@testlab.io",
   },
