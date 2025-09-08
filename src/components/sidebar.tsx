@@ -11,7 +11,7 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  Zap,
+  Code,
   FileText,
   Users
 } from "lucide-react";
@@ -49,10 +49,10 @@ export function Sidebar({ className }: SidebarProps) {
           active: pathname === "/devices",
         },
         {
-          icon: Zap,
-          label: "Triggers",
-          href: "/triggers",
-          active: pathname.startsWith("/triggers"),
+          icon: Code,
+          label: "Scripts",
+          href: "/scripts",
+          active: pathname.startsWith("/scripts"),
         },
       ]
     },
