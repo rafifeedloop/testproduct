@@ -19,10 +19,10 @@ export default function NewScriptPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-semibold leading-8 text-[var(--brand-ink)]">
-              Generate Script
+              Generate Token
             </h1>
             <p className="text-sm leading-6 text-zinc-600 mt-1">
-              Create a CI/CD script to run tests from your pipeline
+              Create a CI/CD token to run tests from your pipeline
             </p>
           </div>
         </div>

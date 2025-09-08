@@ -50,7 +50,7 @@ export function Sidebar({ className }: SidebarProps) {
         },
         {
           icon: Code,
-          label: "Scripts",
+          label: "Token",
           href: "/scripts",
           active: pathname.startsWith("/scripts"),
         },

@@ -258,7 +258,7 @@ export function ScriptsList() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
               <input
                 type="text"
-                placeholder="Search scripts..."
+                placeholder="Search tokens..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 rounded-[var(--r-ctl)] border border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary-500)] focus:border-transparent text-sm"
@@ -279,7 +279,7 @@ export function ScriptsList() {
             <thead>
               <tr className="border-b border-[var(--border-subtle)]">
                 <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                  Script
+                  Token
                 </th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
                   CI Types
@@ -377,7 +377,7 @@ export function ScriptsList() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        title="View Script"
+                        title="View Token"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -394,11 +394,11 @@ export function ScriptsList() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>
                             <Eye className="h-4 w-4 mr-2" />
-                            View Script
+                            View Token
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Copy className="h-4 w-4 mr-2" />
-                            Copy Script
+                            Copy Token
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Download className="h-4 w-4 mr-2" />
@@ -431,7 +431,7 @@ export function ScriptsList() {
         <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-              Total Scripts
+              Total Tokens
             </span>
             <Code className="h-4 w-4 text-[var(--brand-primary-500)]" />
           </div>
@@ -439,7 +439,7 @@ export function ScriptsList() {
             {scripts.length}
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-1">
-            Generated scripts
+            Generated tokens
           </p>
         </div>
 
@@ -454,7 +454,7 @@ export function ScriptsList() {
             {scripts.reduce((acc, s) => acc + s.usageCount, 0)}
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-1">
-            Script executions
+            Token executions
           </p>
         </div>
 
@@ -469,7 +469,7 @@ export function ScriptsList() {
             {scripts.filter((s) => s.lastUsedAt).length}
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-1">
-            Recently used scripts
+            Recently used tokens
           </p>
         </div>
       </div>

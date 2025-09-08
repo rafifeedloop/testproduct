@@ -135,7 +135,7 @@ const mockUsageHistory: ScriptUsage[] = [
 ];
 
 const bashScript = `#!/bin/bash
-# TestLab CI Script - Production Smoke Tests
+# TestLab CI Token - Production Smoke Tests
 # Generated on 2024-01-10T09:00:00Z
 
 # Configuration
@@ -375,7 +375,7 @@ export function ScriptDetail({ id }: ScriptDetailProps) {
             <div className="space-y-3">
               <Button className="w-full justify-start" variant="outline">
                 <Copy className="h-4 w-4 mr-2" />
-                Copy Script
+                Copy Token
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <Download className="h-4 w-4 mr-2" />
@@ -387,7 +387,7 @@ export function ScriptDetail({ id }: ScriptDetailProps) {
               </Button>
               <Button className="w-full justify-start text-[var(--brand-danger)]" variant="outline">
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Script
+                Delete Token
               </Button>
             </div>
           </div>
@@ -424,15 +424,15 @@ export function ScriptDetail({ id }: ScriptDetailProps) {
       {/* Script Code */}
       <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-[var(--brand-ink)]">Script Code</h3>
+          <h3 className="text-base font-semibold text-[var(--brand-ink)]">Token Code</h3>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => copyToClipboard(bashScript, "script")}
+              onClick={() => copyToClipboard(bashScript, "token")}
               className="h-8 px-3"
             >
-              {copied === "script" ? (
+              {copied === "token" ? (
                 <>
                   <Check className="h-4 w-4 mr-2 text-green-500" />
                   Copied
@@ -584,7 +584,7 @@ export function ScriptDetail({ id }: ScriptDetailProps) {
           <div>
             <h3 className="text-base font-semibold text-[var(--brand-ink)]">Recent Usage</h3>
             <p className="text-sm text-[var(--text-muted)] mt-1">
-              Last test runs triggered by this script
+              Last test runs triggered by this token
             </p>
           </div>
           <Activity className="h-5 w-5 text-[var(--brand-primary-500)]" />

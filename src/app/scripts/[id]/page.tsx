@@ -23,10 +23,10 @@ export default function ScriptDetailPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-semibold leading-8 text-[var(--brand-ink)]">
-              Script Details
+              Token Details
             </h1>
             <p className="text-sm leading-6 text-zinc-600 mt-1">
-              View and manage your generated CI/CD script
+              View and manage your generated CI/CD token
             </p>
           </div>
         </div>

@@ -62,7 +62,7 @@ interface FormData {
   envVars: { name: string; value: string }[];
 
   // Step 7: Output
-  scriptName: string;
+  tokenName: string;
   generatedScript: string;
   ciSnippets: Record<string, string>;
 }
@@ -89,7 +89,7 @@ const initialData: FormData = {
     { name: "TESTLAB_URL", value: "https://api.testlab.io" },
     { name: "TESTLAB_TOKEN", value: "${{ secrets.TESTLAB_TOKEN }}" },
   ],
-  scriptName: "",
+  tokenName: "",
   generatedScript: "",
   ciSnippets: {},
 };
@@ -129,7 +129,7 @@ export function ScriptWizard() {
   const generateScript = () => {
     // Generate bash script
     const bashScript = `#!/bin/bash
-# TestLab CI Script - ${formData.scriptName || "Test Runner"}
+# TestLab CI Token - ${formData.tokenName || "Test Runner"}
 # Generated on ${new Date().toISOString()}
 
 # Configuration
@@ -283,13 +283,13 @@ jobs:
 
               <div>
                 <label className="block text-sm font-medium text-[var(--brand-ink)] mb-2">
-                  Script Name
+                  Token Name
                 </label>
                 <input
                   type="text"
-                  value={formData.scriptName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, scriptName: e.target.value }))}
-                  placeholder="e.g., Production Smoke Tests"
+                  value={formData.tokenName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tokenName: e.target.value }))}
+                  placeholder="e.g., Production Test Token"
                   className="w-full h-10 px-4 rounded-[var(--r-ctl)] border border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary-500)] focus:border-transparent text-sm"
                 />
               </div>
@@ -769,16 +769,16 @@ jobs:
           <div className="space-y-6">
             <div className="text-center">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
-              <h2 className="text-base font-semibold text-[var(--brand-ink)]">Generated Script</h2>
+              <h2 className="text-base font-semibold text-[var(--brand-ink)]">Generated Token</h2>
               <p className="text-sm text-[var(--text-muted)] mt-1">
-                Your CI/CD script is ready to use
+                Your CI/CD token is ready to use
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-[var(--brand-ink)]">Script File</h3>
+                  <h3 className="text-sm font-medium text-[var(--brand-ink)]">Token File</h3>
                   <div className="flex gap-2">
                     <Button
                       variant="ghost"
@@ -834,7 +834,7 @@ jobs:
               <div className="bg-blue-50 rounded-[var(--r-ctl)] p-4 border border-blue-200">
                 <h3 className="text-sm font-medium text-blue-900 mb-2">Next Steps</h3>
                 <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                  <li>Copy the script to your repository (e.g., scripts/testlab-run.sh)</li>
+                  <li>Copy the token script to your repository (e.g., scripts/testlab-run.sh)</li>
                   <li>Add the CI configuration to your pipeline</li>
                   <li>Set up the required secrets (TESTLAB_TOKEN)</li>
                   <li>Commit and push to trigger your first test run</li>
@@ -927,7 +927,7 @@ jobs:
               className="bg-gradient-to-tr from-green-500 to-green-600 hover:from-green-600 hover:to-green-500 text-white"
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
-              Save Script
+              Save Token
             </Button>
           )}
         </div>
