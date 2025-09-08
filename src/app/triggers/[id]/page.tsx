@@ -13,12 +13,14 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Calendar,
-  Smartphone,
   Copy,
   MoreHorizontal,
   Download,
   ExternalLink,
+  Zap,
+  GitBranch,
+  Webhook,
+  Link as LinkIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -28,113 +30,147 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DashboardLayout } from "@/app/dashboard-layout";
 
-interface RunHistory {
+type TriggerType = 'ci_push' | 'ci_pipeline' | 'webhook' | 'after_run' | 'manual';
+
+interface FireHistory {
   id: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
+  firedAt: string;
   status: "success" | "failed" | "flaky" | "running";
+  runId: string;
   triggeredBy: string;
-  devices: number;
-  passRate: number;
+  duration: string;
+  testResults?: {
+    passed: number;
+    failed: number;
+    total: number;
+  };
 }
 
-const mockSchedule = {
+const mockTrigger = {
   id: "1",
-  name: "Daily Regression Suite",
-  description: "Comprehensive regression testing for all critical user flows",
-  testSuite: "Full Regression",
-  cadence: "Daily at 09:00 UTC",
-  timezone: "UTC",
-  devices: ["iPhone 14 Pro", "Samsung Galaxy S23", "iPad Pro", "Pixel 7"],
-  nextRun: "2024-01-15 09:00",
-  lastRun: "2024-01-14 09:00",
+  name: "Main Branch Push Trigger",
+  type: "ci_push" as TriggerType,
   enabled: true,
-  createdAt: "2024-01-01",
-  createdBy: "John Doe",
-  maxConcurrency: 5,
-  timeout: 30,
-  retryPolicy: 2,
-  overlapHandling: "skip",
+  description: "Automatically run full regression tests when code is pushed to the main branch",
+  
+  conditions: {
+    provider: "github",
+    repo: "myorg/myapp",
+    branchPattern: "main",
+    event: "push",
+  },
+  
+  testSuite: "Full Regression Suite",
+  devices: ["All iOS Devices", "All Android Devices"],
+  
+  execution: {
+    timeout: 30,
+    retries: 2,
+    overlapPolicy: "skip_new",
+    priority: "normal",
+    maxConcurrency: 5,
+  },
+  
   notifications: {
     slack: true,
     email: false,
     webhook: true,
+    on: ["success", "fail", "flaky"],
   },
-  retentionDays: 30,
+  
+  webhookUrl: "https://api.testlab.io/webhooks/abc123def456ghi789",
+  
+  createdAt: "2024-01-01T10:00:00Z",
+  createdBy: "john@testlab.io",
+  lastFiredAt: "2024-01-15T14:30:00Z",
 };
 
-const mockHistory: RunHistory[] = [
+const mockFireHistory: FireHistory[] = [
   {
-    id: "run-1",
-    startTime: "2024-01-14 09:00",
-    endTime: "2024-01-14 09:45",
-    duration: "45m",
+    id: "fire-1",
+    firedAt: "2024-01-15T14:30:00Z",
     status: "success",
-    triggeredBy: "Schedule",
-    devices: 4,
-    passRate: 98,
+    runId: "run-12345",
+    triggeredBy: "github push",
+    duration: "12m 34s",
+    testResults: { passed: 245, failed: 0, total: 245 },
   },
   {
-    id: "run-2",
-    startTime: "2024-01-13 09:00",
-    endTime: "2024-01-13 09:42",
-    duration: "42m",
+    id: "fire-2", 
+    firedAt: "2024-01-15T10:45:00Z",
     status: "flaky",
-    triggeredBy: "Schedule",
-    devices: 4,
-    passRate: 92,
+    runId: "run-12344",
+    triggeredBy: "github push",
+    duration: "14m 22s",
+    testResults: { passed: 242, failed: 3, total: 245 },
   },
   {
-    id: "run-3",
-    startTime: "2024-01-12 09:00",
-    endTime: "2024-01-12 09:48",
-    duration: "48m",
-    status: "success",
-    triggeredBy: "Schedule",
-    devices: 4,
-    passRate: 100,
-  },
-  {
-    id: "run-4",
-    startTime: "2024-01-11 09:00",
-    endTime: "2024-01-11 09:38",
-    duration: "38m",
+    id: "fire-3",
+    firedAt: "2024-01-14T16:20:00Z", 
     status: "failed",
-    triggeredBy: "Schedule",
-    devices: 3,
-    passRate: 75,
+    runId: "run-12343",
+    triggeredBy: "github push",
+    duration: "8m 15s",
+    testResults: { passed: 200, failed: 45, total: 245 },
   },
   {
-    id: "run-5",
-    startTime: "2024-01-10 09:00",
-    endTime: "2024-01-10 09:44",
-    duration: "44m",
-    status: "success",
-    triggeredBy: "Manual",
-    devices: 4,
-    passRate: 96,
+    id: "fire-4",
+    firedAt: "2024-01-14T11:10:00Z",
+    status: "success", 
+    runId: "run-12342",
+    triggeredBy: "github push",
+    duration: "11m 48s",
+    testResults: { passed: 245, failed: 0, total: 245 },
   },
 ];
 
-export default function ScheduleDetailPage() {
+export default function TriggerDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [schedule, setSchedule] = useState(mockSchedule);
+  const [trigger, setTrigger] = useState(mockTrigger);
   const [showJson, setShowJson] = useState(false);
 
-  const toggleSchedule = () => {
-    setSchedule({ ...schedule, enabled: !schedule.enabled });
+  const toggleTrigger = () => {
+    setTrigger({ ...trigger, enabled: !trigger.enabled });
   };
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this schedule?")) {
-      router.push("/schedule");
+    if (confirm("Are you sure you want to delete this trigger?")) {
+      router.push("/triggers");
     }
   };
 
-  const getStatusIcon = (status: RunHistory["status"]) => {
+  const getTypeIcon = (type: TriggerType) => {
+    switch (type) {
+      case "ci_push":
+        return <GitBranch className="h-4 w-4 text-blue-500" />;
+      case "ci_pipeline":
+        return <Zap className="h-4 w-4 text-purple-500" />;
+      case "webhook":
+        return <Webhook className="h-4 w-4 text-green-500" />;
+      case "after_run":
+        return <LinkIcon className="h-4 w-4 text-orange-500" />;
+      case "manual":
+        return <Play className="h-4 w-4 text-gray-500" />;
+      default:
+        return <Zap className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getTypeLabel = (type: TriggerType) => {
+    const labels = {
+      ci_push: "CI Push",
+      ci_pipeline: "CI Pipeline", 
+      webhook: "Webhook",
+      after_run: "After Run",
+      manual: "Manual",
+    };
+    return labels[type];
+  };
+
+  const getStatusIcon = (status: FireHistory["status"]) => {
     switch (status) {
       case "success":
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
@@ -149,10 +185,10 @@ export default function ScheduleDetailPage() {
     }
   };
 
-  const getStatusBadge = (status: RunHistory["status"]) => {
+  const getStatusBadge = (status: FireHistory["status"]) => {
     const statusStyles = {
       success: "bg-green-50 text-green-700 border-green-200",
-      failed: "bg-red-50 text-red-700 border-red-200",
+      failed: "bg-red-50 text-red-700 border-red-200", 
       flaky: "bg-yellow-50 text-yellow-700 border-yellow-200",
       running: "bg-blue-50 text-blue-700 border-blue-200",
     };
@@ -169,31 +205,30 @@ export default function ScheduleDetailPage() {
     );
   };
 
-  const scheduleConfig = {
-    name: schedule.name,
-    testSuite: schedule.testSuite,
-    cadence: schedule.cadence,
-    timezone: schedule.timezone,
-    devices: schedule.devices,
-    constraints: {
-      maxConcurrency: schedule.maxConcurrency,
-      timeout: schedule.timeout,
-      retryPolicy: schedule.retryPolicy,
-      overlapHandling: schedule.overlapHandling,
-    },
-    notifications: schedule.notifications,
-    artifacts: {
-      retentionDays: schedule.retentionDays,
-    },
+  const copyWebhookUrl = () => {
+    navigator.clipboard.writeText(trigger.webhookUrl);
+  };
+
+  const triggerDefinition = {
+    id: trigger.id,
+    name: trigger.name,
+    type: trigger.type,
+    enabled: trigger.enabled,
+    conditions: trigger.conditions,
+    testSuite: trigger.testSuite,
+    devices: trigger.devices,
+    execution: trigger.execution,
+    notifications: trigger.notifications,
+    webhookUrl: trigger.type === "webhook" ? trigger.webhookUrl : undefined,
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)]">
+    <DashboardLayout>
       <div className="p-6">
-        <Link href="/schedule">
+        <Link href="/triggers">
           <Button variant="ghost" className="mb-4 -ml-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Schedules
+            Back to Triggers
           </Button>
         </Link>
 
@@ -201,18 +236,21 @@ export default function ScheduleDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
               <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h1 className="text-2xl font-semibold text-[var(--brand-ink)]">
-                    {schedule.name}
-                  </h1>
-                  <p className="text-sm text-zinc-600 mt-1">
-                    {schedule.description}
-                  </p>
+                <div className="flex items-start gap-3">
+                  {getTypeIcon(trigger.type)}
+                  <div>
+                    <h1 className="text-2xl font-semibold text-[var(--brand-ink)]">
+                      {trigger.name}
+                    </h1>
+                    <p className="text-sm text-zinc-600 mt-1">
+                      {trigger.description}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
-                    checked={schedule.enabled}
-                    onCheckedChange={toggleSchedule}
+                    checked={trigger.enabled}
+                    onCheckedChange={toggleTrigger}
                     className="data-[state=checked]:bg-gradient-to-tr data-[state=checked]:from-[var(--brand-primary-500)] data-[state=checked]:to-[var(--brand-primary-600)]"
                   />
                   <DropdownMenu>
@@ -230,14 +268,7 @@ export default function ScheduleDetailPage() {
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-[var(--brand-danger)]"
-                        onClick={handleDelete}
-                      >
+                      <DropdownMenuItem className="text-[var(--brand-danger)]" onClick={handleDelete}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
                       </DropdownMenuItem>
@@ -249,63 +280,81 @@ export default function ScheduleDetailPage() {
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
+                    Type
+                  </span>
+                  <p className="text-sm font-medium text-[var(--brand-ink)] mt-1">
+                    {getTypeLabel(trigger.type)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
                     Test Suite
                   </span>
                   <p className="text-sm font-medium text-[var(--brand-ink)] mt-1">
-                    {schedule.testSuite}
+                    {trigger.testSuite}
                   </p>
                 </div>
                 <div>
                   <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Schedule
-                  </span>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Clock className="h-3 w-3 text-[var(--text-muted)]" />
-                    <p className="text-sm font-medium text-[var(--brand-ink)]">
-                      {schedule.cadence}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Next Run
+                    Last Fired
                   </span>
                   <p className="text-sm font-medium text-[var(--brand-ink)] mt-1">
-                    {schedule.nextRun}
+                    2024-01-15 14:30 UTC
                   </p>
                 </div>
                 <div>
                   <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Last Run
+                    Created By
                   </span>
                   <p className="text-sm font-medium text-[var(--brand-ink)] mt-1">
-                    {schedule.lastRun}
+                    {trigger.createdBy}
                   </p>
                 </div>
               </div>
 
               <div className="border-t border-[var(--border-subtle)] pt-4">
                 <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                  Devices
+                  Condition
                 </span>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {schedule.devices.map((device, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-block px-3 py-1 bg-zinc-100 text-zinc-700 rounded-[var(--r-chip)] text-sm"
-                    >
-                      <Smartphone className="h-3 w-3 inline mr-1" />
-                      {device}
-                    </span>
-                  ))}
+                <div className="mt-2 p-3 bg-zinc-50 rounded-[var(--r-ctl)]">
+                  <code className="text-sm text-zinc-800">
+                    {trigger.conditions.provider}/{trigger.conditions.repo} • 
+                    branch: {trigger.conditions.branchPattern} • 
+                    event: {trigger.conditions.event}
+                  </code>
                 </div>
               </div>
             </div>
 
+            {trigger.type === "webhook" && (
+              <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
+                <h2 className="text-base font-semibold text-[var(--brand-ink)] mb-4">
+                  Webhook URL
+                </h2>
+                <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-[var(--r-ctl)]">
+                  <code className="flex-1 text-sm text-zinc-800 break-all">
+                    {trigger.webhookUrl}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={copyWebhookUrl}
+                    className="h-8 w-8 p-0"
+                    title="Copy webhook URL"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] mt-2">
+                  Use this URL to send webhook calls from external systems. The URL includes authentication.
+                </p>
+              </div>
+            )}
+
             <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold text-[var(--brand-ink)]">
-                  Run History
+                  Fire History
                 </h2>
                 <Button variant="outline" size="sm">
                   <Download className="h-4 w-4 mr-2" />
@@ -318,68 +367,68 @@ export default function ScheduleDetailPage() {
                   <thead>
                     <tr className="border-b border-[var(--border-subtle)]">
                       <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                        Run ID
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                        Start Time
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                        Duration
+                        Fired At
                       </th>
                       <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
                         Status
                       </th>
                       <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                        Pass Rate
+                        Run
                       </th>
                       <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                        Trigger
+                        Duration
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
+                        Results
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
+                        Triggered By
                       </th>
                       <th className="text-right py-3 px-4"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)]">
-                    {mockHistory.map((run) => (
-                      <tr key={run.id} className="hover:bg-zinc-50 transition-colors">
+                    {mockFireHistory.map((fire) => (
+                      <tr key={fire.id} className="hover:bg-zinc-50 transition-colors">
+                        <td className="py-3 px-4">
+                          <span className="text-sm text-zinc-800">
+                            {new Date(fire.firedAt).toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">{getStatusBadge(fire.status)}</td>
                         <td className="py-3 px-4">
                           <Link
-                            href={`/test-runs/${run.id}`}
+                            href={`/test-runs/${fire.runId}`}
                             className="text-sm font-medium text-[var(--brand-primary-500)] hover:text-[var(--brand-primary-600)]"
                           >
-                            {run.id}
+                            {fire.runId}
                           </Link>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-sm text-zinc-800">{run.startTime}</span>
+                          <span className="text-sm text-zinc-800">{fire.duration}</span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-sm text-zinc-800">{run.duration}</span>
-                        </td>
-                        <td className="py-3 px-4">{getStatusBadge(run.status)}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-zinc-200 rounded-full h-2">
-                              <div
-                                className={`h-2 rounded-full ${
-                                  run.passRate >= 95
-                                    ? "bg-green-500"
-                                    : run.passRate >= 80
-                                    ? "bg-yellow-500"
-                                    : "bg-red-500"
-                                }`}
-                                style={{ width: `${run.passRate}%` }}
-                              />
+                          {fire.testResults && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                {fire.testResults.passed}
+                              </span>
+                              {fire.testResults.failed > 0 && (
+                                <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                                  {fire.testResults.failed}
+                                </span>
+                              )}
+                              <span className="text-xs text-[var(--text-muted)]">
+                                / {fire.testResults.total}
+                              </span>
                             </div>
-                            <span className="text-sm font-medium text-zinc-800 tabular-nums">
-                              {run.passRate}%
-                            </span>
-                          </div>
+                          )}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-sm text-zinc-600">{run.triggeredBy}</span>
+                          <span className="text-sm text-zinc-600">{fire.triggeredBy}</span>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <Link href={`/test-runs/${run.id}`}>
+                          <Link href={`/test-runs/${fire.runId}`}>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                               <ExternalLink className="h-4 w-4" />
                             </Button>
@@ -396,50 +445,66 @@ export default function ScheduleDetailPage() {
           <div className="space-y-6">
             <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
               <h3 className="text-base font-semibold text-[var(--brand-ink)] mb-4">
-                Configuration
+                Execution Settings
               </h3>
               <dl className="space-y-3">
-                <div>
-                  <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Max Concurrency
-                  </dt>
-                  <dd className="text-sm font-medium text-zinc-800 mt-1">
-                    {schedule.maxConcurrency} parallel runs
-                  </dd>
-                </div>
                 <div>
                   <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
                     Timeout
                   </dt>
                   <dd className="text-sm font-medium text-zinc-800 mt-1">
-                    {schedule.timeout} minutes
+                    {trigger.execution.timeout} minutes
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Retry Policy
+                    Retries
                   </dt>
                   <dd className="text-sm font-medium text-zinc-800 mt-1">
-                    Up to {schedule.retryPolicy} retries
+                    Up to {trigger.execution.retries}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Overlap Handling
+                    Overlap Policy
                   </dt>
                   <dd className="text-sm font-medium text-zinc-800 mt-1 capitalize">
-                    {schedule.overlapHandling}
+                    {trigger.execution.overlapPolicy.replace('_', ' ')}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Artifact Retention
+                    Priority
+                  </dt>
+                  <dd className="text-sm font-medium text-zinc-800 mt-1 capitalize">
+                    {trigger.execution.priority}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
+                    Max Concurrency
                   </dt>
                   <dd className="text-sm font-medium text-zinc-800 mt-1">
-                    {schedule.retentionDays} days
+                    {trigger.execution.maxConcurrency} devices
                   </dd>
                 </div>
               </dl>
+            </div>
+
+            <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
+              <h3 className="text-base font-semibold text-[var(--brand-ink)] mb-4">
+                Target Devices
+              </h3>
+              <div className="space-y-2">
+                {trigger.devices.map((device, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-block px-3 py-1 bg-zinc-100 text-zinc-700 rounded-[var(--r-chip)] text-sm mr-2 mb-2"
+                  >
+                    {device}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="bg-[var(--surface)] rounded-[var(--r-card)] shadow-[var(--e-1)] p-5">
@@ -451,9 +516,7 @@ export default function ScheduleDetailPage() {
                   <span className="text-sm text-zinc-600">Slack</span>
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      schedule.notifications.slack
-                        ? "bg-green-500"
-                        : "bg-zinc-300"
+                      trigger.notifications.slack ? "bg-green-500" : "bg-zinc-300"
                     }`}
                   />
                 </div>
@@ -461,9 +524,7 @@ export default function ScheduleDetailPage() {
                   <span className="text-sm text-zinc-600">Email</span>
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      schedule.notifications.email
-                        ? "bg-green-500"
-                        : "bg-zinc-300"
+                      trigger.notifications.email ? "bg-green-500" : "bg-zinc-300"
                     }`}
                   />
                 </div>
@@ -471,11 +532,25 @@ export default function ScheduleDetailPage() {
                   <span className="text-sm text-zinc-600">Webhook</span>
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      schedule.notifications.webhook
-                        ? "bg-green-500"
-                        : "bg-zinc-300"
+                      trigger.notifications.webhook ? "bg-green-500" : "bg-zinc-300"
                     }`}
                   />
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-3 border-t border-[var(--border-subtle)]">
+                <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
+                  Notify On
+                </span>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {trigger.notifications.on.map((event) => (
+                    <span
+                      key={event}
+                      className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-[var(--r-chip)] text-xs"
+                    >
+                      {event}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -496,7 +571,7 @@ export default function ScheduleDetailPage() {
               {showJson && (
                 <div className="bg-zinc-900 rounded-[var(--r-ctl)] p-3 text-zinc-100">
                   <pre className="text-xs overflow-x-auto">
-                    {JSON.stringify(scheduleConfig, null, 2)}
+                    {JSON.stringify(triggerDefinition, null, 2)}
                   </pre>
                 </div>
               )}
@@ -509,23 +584,15 @@ export default function ScheduleDetailPage() {
               <dl className="space-y-3">
                 <div>
                   <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Created By
-                  </dt>
-                  <dd className="text-sm font-medium text-zinc-800 mt-1">
-                    {schedule.createdBy}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
                     Created At
                   </dt>
                   <dd className="text-sm font-medium text-zinc-800 mt-1">
-                    {schedule.createdAt}
+                    {new Date(trigger.createdAt).toLocaleString()}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
-                    Schedule ID
+                    Trigger ID
                   </dt>
                   <dd className="text-sm font-mono text-zinc-600 mt-1">
                     {params.id}
@@ -536,6 +603,6 @@ export default function ScheduleDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
