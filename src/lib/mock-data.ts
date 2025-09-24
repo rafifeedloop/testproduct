@@ -10,6 +10,8 @@ export interface Run {
   device: string;
   startISO: string;
   durationSec: number;
+  bulkTestId?: string;
+  iterationNumber?: number;
 }
 
 export interface Step {
@@ -116,4 +118,114 @@ export const flakyByDevice = [
   { device: "Samsung S24", percent: 28 },
   { device: "Pixel 8 Pro", percent: 22 },
   { device: "iPad Pro", percent: 16 },
+];
+
+// Device Presets
+export const devicePresets = [
+  {
+    id: "preset-all-ios",
+    name: "All iOS Devices",
+    description: "All available iOS devices",
+    deviceIds: ["dev-001", "dev-002", "dev-003", "dev-008"]
+  },
+  {
+    id: "preset-all-android",
+    name: "All Android Devices",
+    description: "All available Android devices",
+    deviceIds: ["dev-004", "dev-005", "dev-006", "dev-007"]
+  },
+  {
+    id: "preset-latest-ios",
+    name: "Latest iOS (17.2+)",
+    description: "iOS devices running version 17.2 or higher",
+    deviceIds: ["dev-001", "dev-003", "dev-008"]
+  },
+  {
+    id: "preset-legacy-android",
+    name: "Legacy Android (13-)",
+    description: "Android devices running version 13 or lower",
+    deviceIds: ["dev-006", "dev-007"]
+  },
+  {
+    id: "preset-tablets",
+    name: "All Tablets",
+    description: "iPad and Android tablet devices",
+    deviceIds: ["dev-003"]
+  },
+  {
+    id: "preset-phones",
+    name: "All Phones",
+    description: "iPhone and Android phone devices",
+    deviceIds: ["dev-001", "dev-002", "dev-004", "dev-005", "dev-006", "dev-007", "dev-008"]
+  }
+];
+
+// Test Scenarios
+export const testScenarios = [
+  {
+    id: "scenario-login",
+    name: "Login Flow Test",
+    description: "Complete user authentication flow",
+    steps: 3
+  },
+  {
+    id: "scenario-checkout",
+    name: "E-commerce Checkout",
+    description: "Full purchase flow with payment",
+    steps: 7
+  },
+  {
+    id: "scenario-onboarding",
+    name: "User Onboarding",
+    description: "New user registration and setup",
+    steps: 5
+  },
+  {
+    id: "scenario-navigation",
+    name: "App Navigation Test",
+    description: "Test all main navigation paths",
+    steps: 4
+  }
+];
+
+// Bulk Test Examples
+export const bulkTestConfigs = [
+  {
+    id: "bulk-config-001",
+    name: "Cross-platform Login Test",
+    scenarioId: "scenario-login",
+    deviceIds: ["dev-001", "dev-004", "dev-005"],
+    iterationCount: 10,
+    createdAt: "2024-01-15T08:00:00Z"
+  },
+  {
+    id: "bulk-config-002",
+    name: "iOS Checkout Regression",
+    scenarioId: "scenario-checkout",
+    deviceIds: ["dev-001", "dev-002", "dev-003"],
+    iterationCount: 5,
+    createdAt: "2024-01-15T09:00:00Z"
+  }
+];
+
+export const bulkTestRuns = [
+  {
+    id: "bulk-run-001",
+    configId: "bulk-config-001",
+    status: "completed" as const,
+    startedAt: "2024-01-15T10:00:00Z",
+    completedAt: "2024-01-15T10:45:00Z",
+    totalRuns: 30,
+    completedRuns: 30,
+    runs: []
+  },
+  {
+    id: "bulk-run-002",
+    configId: "bulk-config-002",
+    status: "running" as const,
+    startedAt: "2024-01-15T11:00:00Z",
+    totalRuns: 15,
+    completedRuns: 8,
+    runs: []
+  }
 ];

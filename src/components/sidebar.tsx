@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  TestTube2, 
-  Smartphone, 
-  TrendingUp, 
-  Settings, 
+import {
+  LayoutDashboard,
+  TestTube2,
+  Smartphone,
+  TrendingUp,
+  Settings,
   HelpCircle,
   ChevronLeft,
   ChevronRight,
   Code,
   FileText,
-  Users
+  Users,
+  FileJson
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -53,6 +54,12 @@ export function Sidebar({ className }: SidebarProps) {
           label: "Token",
           href: "/scripts",
           active: pathname.startsWith("/scripts"),
+        },
+        {
+          icon: FileJson,
+          label: "Scenarios",
+          href: "/scenarios",
+          active: pathname.startsWith("/scenarios"),
         },
       ]
     },

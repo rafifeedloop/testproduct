@@ -4,9 +4,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, RotateCw } from "lucide-react";
+import { CalendarIcon, RotateCw, Zap } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface HeaderBarProps {
   onFiltersChange?: (filters: any) => void;
@@ -15,6 +16,7 @@ interface HeaderBarProps {
 
 export function HeaderBar({ onFiltersChange, onRerun }: HeaderBarProps) {
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const router = useRouter();
 
   return (
     <header className="flex items-center justify-between mb-6">
@@ -84,7 +86,16 @@ export function HeaderBar({ onFiltersChange, onRerun }: HeaderBarProps) {
           </SelectContent>
         </Select>
 
-        <Button 
+        <Button
+          onClick={() => router.push('/bulk-test')}
+          className="h-10 text-sm rounded-[var(--r-ctl)] bg-[var(--brand-primary-500)] text-white border border-[var(--brand-primary-500)] hover:bg-[var(--brand-primary-600)] shadow-[var(--e-1)] hover:shadow-[var(--e-2)] transition-all"
+          aria-label="Start bulk test"
+        >
+          <Zap className="mr-2 h-4 w-4" />
+          Bulk Test
+        </Button>
+
+        <Button
           onClick={onRerun}
           className="h-10 text-sm rounded-[var(--r-ctl)] bg-[var(--surface)] text-[var(--brand-ink)] border border-[var(--border-subtle)] hover:bg-zinc-50 shadow-[var(--e-1)] hover:shadow-[var(--e-2)] transition-all"
           aria-label="Re-run filters"
